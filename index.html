@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Datenschutz-Quiz 2022</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0e10;
+    --surface: #18181c;
+    --surface2: #222228;
+    --border: #2e2e38;
+    --accent: #e8ff47;
+    --accent2: #47c8ff;
+    --text: #f0f0f4;
+    --muted: #8888a0;
+    --correct: #47ffb0;
+    --wrong: #ff5566;
+    --radius: 6px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    padding: 2rem 1rem 4rem;
+  }
+
+  .container {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  header {
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  header .tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  header p {
+    margin-top: 0.75rem;
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+
+  .question-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+
+  .question-block:hover {
+    border-color: #44444f;
+  }
+
+  .q-number {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+
+  .q-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .q-desc {
+    font-size: 0.88rem;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* Q3 – 10 Textfelder */
+  .grid-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .input-row span {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    width: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  input[type="text"], input[type="number"] {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    padding: 0.5rem 0.75rem;
+    width: 100%;
+    transition: border-color 0.15s;
+    outline: none;
+  }
+
+  input[type="text"]:focus, input[type="number"]:focus {
+    border-color: var(--accent);
+  }
+
+  /* Q4 – Multiple choice */
+  .mc-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .mc-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    user-select: none;
+  }
+
+  .mc-item:hover {
+    border-color: #44444f;
+  }
+
+  .mc-item.selected {
+    border-color: var(--accent2);
+    background: rgba(71, 200, 255, 0.07);
+  }
+
+  .mc-item.correct { border-color: var(--correct); background: rgba(71, 255, 176, 0.08); }
+  .mc-item.wrong   { border-color: var(--wrong);   background: rgba(255, 85, 102, 0.08); }
+  .mc-item.missed  { border-color: var(--correct); background: rgba(71, 255, 176, 0.04); opacity: 0.7; }
+
+  .mc-key {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent2);
+    padding-top: 1px;
+    flex-shrink: 0;
+    width: 1rem;
+  }
+
+  .mc-text {
+    font-size: 0.9rem;
+    line-height: 1.45;
+  }
+
+  /* Q5 – Sortierung */
+  .sort-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .sort-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.65rem 1rem;
+    cursor: grab;
+    transition: border-color 0.15s, opacity 0.15s;
+    user-select: none;
+  }
+
+  .sort-item:active { cursor: grabbing; opacity: 0.6; }
+  .sort-item.drag-over { border-color: var(--accent); }
+  .sort-item.correct { border-color: var(--correct); }
+  .sort-item.wrong   { border-color: var(--wrong); }
+
+  .sort-handle {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  .sort-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--accent);
+    flex-shrink: 0;
+    width: 1rem;
+  }
+
+  .sort-text {
+    font-size: 0.88rem;
+    line-height: 1.4;
+  }
+
+  /* Q6 */
+  .estimate-row {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .estimate-field {
+    flex: 1;
+  }
+
+  .estimate-field label {
+    display: block;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* Q7 */
+  .silben-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .silben-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .silben-row span {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    width: 1.2rem;
+    flex-shrink: 0;
+  }
+
+  .silben-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.5rem 0.75rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    line-height: 1.8;
+    letter-spacing: 0.05em;
+  }
+
+  /* Q8 */
+  .vocab-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .vocab-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .vocab-item label {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  /* Feedback icons */
+  .feedback-icon {
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+
+  /* Auswerten Button */
+  .submit-area {
+    text-align: center;
+    margin-top: 2.5rem;
+  }
+
+  button.auswerten {
+    background: var(--accent);
+    color: #0e0e10;
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    border: none;
+    border-radius: var(--radius);
+    padding: 0.9rem 2.5rem;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+
+  button.auswerten:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(232, 255, 71, 0.25);
+  }
+
+  /* Score */
+  .score-board {
+    display: none;
+    background: var(--surface);
+    border: 2px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 2rem;
+    margin-top: 2rem;
+    text-align: center;
+  }
+
+  .score-board.visible { display: block; }
+
+  .score-big {
+    font-family: 'Syne', sans-serif;
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .score-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 0.5rem;
+    letter-spacing: 0.1em;
+  }
+
+  .score-note {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+
+  .q6-result {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 0.75rem;
+  }
+
+  .musterloesung {
+    display: none;
+    margin-top: 1rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+  .musterloesung.visible { display: block; }
+  .musterloesung strong { color: var(--accent); font-family: 'DM Mono', monospace; }
+
+  @media (max-width: 520px) {
+    .grid-inputs { grid-template-columns: 1fr; }
+    .estimate-row { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="tag">Team-Challenge · 30 Minuten</div>
+    <h1>Datenschutz-Quiz 2022</h1>
+    <p>8 Fragen · verschiedene Aspekte des Datenschutzes · viel Erfolg</p>
+  </header>
+
+  <!-- Q3 -->
+  <div class="question-block">
+    <div class="q-number">Frage 03</div>
+    <div class="q-title">Was sind personenbezogene Daten?</div>
+    <div class="q-desc">Nennt 10 Dinge, die personenbezogene Daten sind. (1 Punkt pro Antwort)</div>
+    <div class="grid-inputs" id="q3-inputs">
+      <!-- generated by JS -->
+    </div>
+  </div>
+
+  <!-- Q4 -->
+  <div class="question-block">
+    <div class="q-number">Frage 04</div>
+    <div class="q-title">Grundsätze der DSGVO</div>
+    <div class="q-desc">Welche der folgenden Aussagen sind richtig? Klickt zum Auswählen.</div>
+    <div class="mc-list" id="q4-list"></div>
+  </div>
+
+  <!-- Q5 -->
+  <div class="question-block">
+    <div class="q-number">Frage 05</div>
+    <div class="q-title">Datenschutzverletzungen</div>
+    <div class="q-desc">Sortiert die Fälle nach Bußgeldhöhe – vom niedrigsten zum höchsten. Drag & Drop.</div>
+    <div class="sort-list" id="q5-list"></div>
+  </div>
+
+  <!-- Q6 -->
+  <div class="question-block">
+    <div class="q-number">Frage 06</div>
+    <div class="q-title">Bußgelder</div>
+    <div class="q-desc">Schätzt das minimale und maximale Bußgeld (in EUR) aus Frage 5. (Bis zu 5 Punkte je Schätzung, −1 pro Dezimalstelle Abweichung)</div>
+    <div class="estimate-row">
+      <div class="estimate-field">
+        <label>MINIMUM (EUR)</label>
+        <input type="number" id="q6-min" placeholder="z.B. 500" min="0">
+      </div>
+      <div class="estimate-field">
+        <label>MAXIMUM (EUR)</label>
+        <input type="number" id="q6-max" placeholder="z.B. 1000000" min="0">
+      </div>
+    </div>
+    <div class="q6-result" id="q6-result"></div>
+  </div>
+
+  <!-- Q7 -->
+  <div class="question-block">
+    <div class="q-number">Frage 07</div>
+    <div class="q-title">Vokabular I</div>
+    <div class="q-desc">Setzt DSGVO-Begriffe aus den folgenden Silben zusammen. (2 Punkte pro Begriff)</div>
+    <div class="silben-box">
+      ACH · AN · AS · BRE · CER · CY · DA · DA · DA · DA · DA · FI · GE · GRUND · GU ·
+      IM · LA · MENT · NE · NUNG · OF · ON · ON · ON · ON · ON · ORD · PACT · PRI ·
+      PRO · PRO · RAL · RE · SESS · SCHUTZ · TA · TA · TA · TA · TEN · TEC · TEC ·
+      TI · TI · TI · TI · VA · VER · YMI · ZA
+    </div>
+    <div class="silben-fields" id="q7-inputs"></div>
+    <div class="musterloesung" id="q7-muster">
+      <strong>Musterlösung:</strong><br>
+      1. DATENSCHUTZGRUNDVERORDNUNG<br>
+      2. DATA PROTECTION<br>
+      3. DATA BREACH<br>
+      4. PRIVACY<br>
+      5. ANONYMIZATION<br>
+      6. IMPACT ASSESSMENT<br>
+      7. GENERAL (oder weiteres)
+    </div>
+  </div>
+
+  <!-- Q8 -->
+  <div class="question-block">
+    <div class="q-number">Frage 08</div>
+    <div class="q-title">Vokabular II</div>
+    <div class="q-desc">Beantwortet die folgenden Fragen.</div>
+    <div class="vocab-list" id="q8-list"></div>
+    <div class="musterloesung" id="q8-muster">
+      <strong>Musterlösung:</strong><br>
+      a) General Data Protection Regulation<br>
+      b) Anonymisierung<br>
+      c) Datenschutz-Grundverordnung (DSGVO)<br>
+      d) Datenpanne / Data Breach<br>
+      e) Datenschutzbeauftragter (DSB)<br>
+      f) Datenschutz-Folgenabschätzung (DPIA)
+    </div>
+  </div>
+
+  <div class="submit-area">
+    <button class="auswerten" onclick="auswerten()">Auswerten →</button>
+  </div>
+
+  <div class="score-board" id="score-board">
+    <div class="score-big" id="score-val">–</div>
+    <div class="score-label">PUNKTE VON <span id="score-max">–</span> MÖGLICHEN</div>
+    <div class="score-note" id="score-note"></div>
+  </div>
+
+</div>
+
+<script>
+// ── Q3 ──────────────────────────────────────────────────────────────────
+const q3container = document.getElementById('q3-inputs');
+for (let i = 1; i <= 10; i++) {
+  const row = document.createElement('div');
+  row.className = 'input-row';
+  row.innerHTML = `<span>${i}.</span><input type="text" id="q3-${i}" placeholder="z.B. Name, E-Mail …">`;
+  q3container.appendChild(row);
+}
+
+// ── Q4 ──────────────────────────────────────────────────────────────────
+const q4items = [
+  { key: 'a', text: 'Bevor personenbezogene Daten erhoben werden, hast du ein Recht auf informierte Einwilligung.', correct: true },
+  { key: 'b', text: 'Du darfst personenbezogene Daten privat ohne Einwilligung weitergeben.', correct: false },
+  { key: 'c', text: 'Jede Organisation mit mehr als 10 Mitarbeitenden muss einen Datenschutzbeauftragten haben.', correct: false },
+  { key: 'd', text: 'Du hast das Recht, dass deine Daten gelöscht werden, mit einigen Ausnahmen (z.B. Steuerunterlagen).', correct: true },
+  { key: 'e', text: 'Wenn deine personenbezogenen Daten unbeabsichtigt offengelegt werden, hast du ein Recht, darüber informiert zu werden.', correct: true },
+  { key: 'f', text: 'Du hast das Recht anzufragen, welche Daten über dich gespeichert sind.', correct: true },
+  { key: 'g', text: 'Du hast das Recht, deine personenbezogenen Daten in einem zugänglichen Format zu erhalten.', correct: true },
+  { key: 'h', text: 'Du hast das Recht, deine Daten im CSV-Format zu erhalten oder über eine API darauf zuzugreifen.', correct: false },
+  { key: 'i', text: 'Wenn dir ein Kredit verweigert wird, hast du das Recht, dass die Entscheidung von einem Menschen überprüft wird.', correct: true },
+  { key: 'j', text: 'Bei der Erhebung von Daten von Kindern unter 18 Jahren ist die Zustimmung der Eltern erforderlich.', correct: false },
+  { key: 'k', text: 'Das Recht auf Vergessenwerden hat Ausnahmen, z.B. für Forschungszwecke.', correct: true },
+];
+
+const q4list = document.getElementById('q4-list');
+q4items.forEach(item => {
+  const el = document.createElement('div');
+  el.className = 'mc-item';
+  el.dataset.key = item.key;
+  el.dataset.correct = item.correct;
+  el.innerHTML = `<span class="mc-key">${item.key})</span><span class="mc-text">${item.text}</span><span class="feedback-icon"></span>`;
+  el.addEventListener('click', () => {
+    if (!el.classList.contains('locked')) el.classList.toggle('selected');
+  });
+  q4list.appendChild(el);
+});
+
+// ── Q5 ──────────────────────────────────────────────────────────────────
+const q5items = [
+  { key: 'd', text: 'Privatperson fotografierte Fahrzeuge & sandte Bilder unverschlüsselt per E-Mail.' },
+  { key: 'c', text: 'Polizeibeamter griff wiederholt privat auf Polizeidatenbank zu.' },
+  { key: 'a', text: 'Kleines Unternehmen: veraltete Webanwendungen, Passwörter unsicher gespeichert.' },
+  { key: 'f', text: 'VfB Stuttgart: fahrlässige Verletzung der Rechenschaftspflicht, kooperativ.' },
+  { key: 'b', text: 'Marriott: Kundendatenbank gehackt, Namen, Adressen & Passnummern offengelegt.' },
+  { key: 'g', text: 'H&M: Aufzeichnung verpflichtender Online-Meetings mit privaten Details von Hunderten Mitarbeitenden.' },
+  { key: 'e', text: 'Amazon: unzureichende Cookie-Einwilligung, Wiederholungsfall nach Vorjahresbußgeld.' },
+];
+
+// Shuffle for display
+const q5shuffled = [...q5items].sort(() => Math.random() - 0.5);
+const correctOrder = q5items.map(i => i.key); // d,c,a,f,b,g,e
+
+const q5list = document.getElementById('q5-list');
+let dragSrc = null;
+
+function buildSortList() {
+  q5list.innerHTML = '';
+  q5shuffled.forEach((item, idx) => {
+    const el = document.createElement('div');
+    el.className = 'sort-item';
+    el.draggable = true;
+    el.dataset.key = item.key;
+    el.innerHTML = `<span class="sort-handle">⠿</span><span class="sort-label">${item.key})</span><span class="sort-text">${item.text}</span>`;
+
+    el.addEventListener('dragstart', e => { dragSrc = el; el.style.opacity = '0.5'; });
+    el.addEventListener('dragend',   e => { el.style.opacity = '1'; document.querySelectorAll('.sort-item').forEach(i => i.classList.remove('drag-over')); });
+    el.addEventListener('dragover',  e => { e.preventDefault(); el.classList.add('drag-over'); });
+    el.addEventListener('dragleave', e => { el.classList.remove('drag-over'); });
+    el.addEventListener('drop', e => {
+      e.preventDefault();
+      if (dragSrc !== el) {
+        const allItems = [...q5list.querySelectorAll('.sort-item')];
+        const srcIdx = allItems.indexOf(dragSrc);
+        const tgtIdx = allItems.indexOf(el);
+        if (srcIdx < tgtIdx) q5list.insertBefore(dragSrc, el.nextSibling);
+        else q5list.insertBefore(dragSrc, el);
+      }
+      el.classList.remove('drag-over');
+    });
+    q5list.appendChild(el);
+  });
+}
+buildSortList();
+
+// ── Q7 ──────────────────────────────────────────────────────────────────
+const q7container = document.getElementById('q7-inputs');
+for (let i = 1; i <= 7; i++) {
+  const row = document.createElement('div');
+  row.className = 'silben-row';
+  row.innerHTML = `<span>${i}.</span><input type="text" id="q7-${i}" placeholder="Begriff eingeben …">`;
+  q7container.appendChild(row);
+}
+
+// ── Q8 ──────────────────────────────────────────────────────────────────
+const q8questions = [
+  'a) Wofür steht die Abkürzung GDPR?',
+  'b) Der Prozess, personenbezogene Daten in nicht-personenbezogene Daten umzuwandeln.',
+  'c) Der deutsche Name der GDPR?',
+  'd) Ein Verstoß gegen Datenschutzrechte (versehentlich oder absichtlich).',
+  'e) Die für Richtlinien zu personenbezogenen Daten verantwortliche Person in einer Organisation.',
+  'f) Ein Dokument, das den Umgang mit Daten beschreibt und erforderlich ist, wenn sensible Daten verarbeitet werden oder ein Unternehmen große Datenmengen verarbeitet.',
+];
+
+const q8answers = [
+  'general data protection regulation',
+  'anonymisierung',
+  'datenschutz-grundverordnung',
+  'datenpanne',
+  'datenschutzbeauftragter',
+  'datenschutz-folgenabschätzung',
+];
+
+const q8list = document.getElementById('q8-list');
+q8questions.forEach((q, i) => {
+  const el = document.createElement('div');
+  el.className = 'vocab-item';
+  el.innerHTML = `<label>${q}</label><input type="text" id="q8-${i}" placeholder="Antwort …">`;
+  q8list.appendChild(el);
+});
+
+// ── AUSWERTEN ───────────────────────────────────────────────────────────
+function auswerten() {
+  let total = 0;
+  let maxPoints = 0;
+
+  // Q3 – 1 pt each, up to 10
+  let q3pts = 0;
+  for (let i = 1; i <= 10; i++) {
+    const val = document.getElementById(`q3-${i}`).value.trim();
+    if (val.length > 1) q3pts++;
+  }
+  q3pts = Math.min(q3pts, 10);
+  total += q3pts;
+  maxPoints += 10;
+
+  // Q4 – 1 pt per correct selection (selected+correct or not-selected+incorrect)
+  let q4pts = 0;
+  document.querySelectorAll('.mc-item').forEach(el => {
+    el.classList.add('locked');
+    const isCorrect = el.dataset.correct === 'true';
+    const isSelected = el.classList.contains('selected');
+    const icon = el.querySelector('.feedback-icon');
+    if (isSelected && isCorrect)  { el.classList.add('correct'); icon.textContent = '✓'; q4pts++; }
+    else if (isSelected && !isCorrect) { el.classList.add('wrong'); icon.textContent = '✗'; }
+    else if (!isSelected && isCorrect) { el.classList.add('missed'); icon.textContent = '○'; }
+    else { q4pts++; } // correctly not selected
+  });
+  total += q4pts;
+  maxPoints += q4items.length;
+
+  // Q5 – 16 pts minus swap operations needed
+  const currentOrder = [...q5list.querySelectorAll('.sort-item')].map(el => el.dataset.key);
+  let swaps = countSwaps(currentOrder, correctOrder);
+  let q5pts = Math.max(0, 16 - swaps);
+  total += q5pts;
+  maxPoints += 16;
+
+  // Mark Q5 items
+  currentOrder.forEach((key, idx) => {
+    const el = q5list.querySelector(`[data-key="${key}"]`);
+    if (correctOrder[idx] === key) el.classList.add('correct');
+    else el.classList.add('wrong');
+  });
+
+  // Q6 – up to 5 pts each
+  const realMin = 90;       // approx: Privatperson ~90 EUR
+  const realMax = 746000000; // Amazon ~746M EUR
+  const guessMin = parseFloat(document.getElementById('q6-min').value) || 0;
+  const guessMax = parseFloat(document.getElementById('q6-max').value) || 0;
+
+  function q6score(guess, real) {
+    if (!guess) return 0;
+    const diff = Math.abs(Math.log10(Math.max(guess,1)) - Math.log10(Math.max(real,1)));
+    return Math.max(0, 5 - Math.floor(diff));
+  }
+
+  const q6minPts = q6score(guessMin, realMin);
+  const q6maxPts = q6score(guessMax, realMax);
+  total += q6minPts + q6maxPts;
+  maxPoints += 10;
+
+  document.getElementById('q6-result').textContent =
+    `Min-Schätzung: ${q6minPts}/5 Pkt (real: ca. ${realMin.toLocaleString('de-DE')} EUR) · ` +
+    `Max-Schätzung: ${q6maxPts}/5 Pkt (real: ca. ${realMax.toLocaleString('de-DE')} EUR)`;
+
+  // Q7 – 2 pts each, manual review → show Musterlösung
+  maxPoints += 14;
+  document.getElementById('q7-muster').classList.add('visible');
+  // We trust self-scoring; give 14 if all filled
+  let q7filled = 0;
+  for (let i = 1; i <= 7; i++) {
+    if (document.getElementById(`q7-${i}`).value.trim().length > 1) q7filled++;
+  }
+  // Partial credit note shown in musterlösung
+
+  // Q8 – auto-check loose match
+  let q8pts = 0;
+  q8answers.forEach((ans, i) => {
+    const input = document.getElementById(`q8-${i}`);
+    const val = input.value.trim().toLowerCase();
+    const words = ans.split(/[\s\-\/]+/);
+    const hit = words.some(w => val.includes(w) && w.length > 3);
+    if (hit) { q8pts++; input.style.borderColor = 'var(--correct)'; }
+    else if (val.length > 0) { input.style.borderColor = 'var(--wrong)'; }
+  });
+  total += q8pts;
+  maxPoints += 6;
+  document.getElementById('q8-muster').classList.add('visible');
+
+  // Score display
+  const board = document.getElementById('score-board');
+  board.classList.add('visible');
+  document.getElementById('score-val').textContent = total;
+  document.getElementById('score-max').textContent = maxPoints;
+
+  let note = '';
+  const pct = total / maxPoints;
+  if (pct >= 0.85) note = '🏆 Ausgezeichnet! Ihr seid echte Datenschutz-Profis.';
+  else if (pct >= 0.65) note = '👍 Solide! Ihr kennt euch gut aus.';
+  else if (pct >= 0.4) note = '📚 Nicht schlecht – noch Luft nach oben.';
+  else note = '🔍 Zeit, sich mit dem Datenschutz zu beschäftigen!';
+  document.getElementById('score-note').textContent = note;
+
+  board.scrollIntoView({ behavior: 'smooth' });
+}
+
+// Count bubble-sort swaps to transform current into correct order
+function countSwaps(current, correct) {
+  const arr = current.map(k => correct.indexOf(k));
+  let swaps = 0;
+  const a = [...arr];
+  for (let i = 0; i < a.length; i++) {
+    for (let j = 0; j < a.length - i - 1; j++) {
+      if (a[j] > a[j+1]) { [a[j], a[j+1]] = [a[j+1], a[j]]; swaps++; }
+    }
+  }
+  return swaps;
+}
+</script>
+</body>
+</html>
